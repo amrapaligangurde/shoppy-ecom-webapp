@@ -1077,6 +1077,141 @@ h2,
   border-radius: 8px;
 }
 
+/* ---------- Search suggestions ---------- */
+.search-wrap {
+  position: relative;
+  max-width: 460px;
+}
+
+.suggest {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  list-style: none;
+  margin: 0;
+  padding: 6px;
+  z-index: 20;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.suggest-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  text-decoration: none;
+  color: var(--text);
+}
+
+.suggest-item:hover {
+  background: var(--accent-soft);
+}
+
+.suggest-item img {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+  background: #fff;
+  border-radius: 6px;
+}
+
+.suggest-title {
+  flex: 1;
+  font-size: 0.86rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.suggest-price {
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+/* ---------- Sub-filters ---------- */
+.subfilters {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin: -8px 0 20px;
+}
+
+.subfilters select {
+  background: var(--card);
+  color: var(--text);
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  padding: 7px 10px;
+  font-size: 0.83rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.deal-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.deal-toggle input {
+  accent-color: var(--accent);
+}
+
+/* ---------- Page head / order footer ---------- */
+.page-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.order-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* ---------- Back to top ---------- */
+.back-to-top {
+  position: fixed;
+  bottom: 22px;
+  left: 22px;
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-contrast);
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+  z-index: 50;
+}
+
+/* ---------- Field select (saved addresses) ---------- */
+.field select {
+  background: var(--input-bg);
+  color: var(--text);
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  padding: 11px 13px;
+  font-size: 0.95rem;
+  font-family: inherit;
+}
+
 /* ---------- Error fallback ---------- */
 .error-fallback {
   text-align: center;
