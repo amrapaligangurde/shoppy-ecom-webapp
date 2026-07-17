@@ -5,13 +5,17 @@ A responsive online-marketplace web app built with React — browse real product
 ## Features
 
 - Product catalog fetched from the [DummyJSON](https://dummyjson.com) API with loading skeletons and "Load more" pagination
-- Debounced server-side search (custom `useDebounce` hook), category filter chips, and client-side sorting
+- Debounced server-side search (custom `useDebounce` hook) with a live suggestions dropdown, category filter chips, and client-side sorting
+- Price-range, minimum-rating, and "deals only" filters with one-click clear
 - Product detail page with image gallery, stock status, customer reviews, and a "You may also like" rail of related products
 - "Recently viewed" rail on the home page
 - Cart with quantity steppers, discount-aware pricing, savings line, and free shipping over $100
 - Coupon codes (`SHOPPY10`, `WELCOME5`) with validation and removal
 - Wishlist with heart toggle on every card, shown on its own page
-- Order history page — every placed order is saved and browsable
+- Order history page with one-click **Reorder** (adds all items back to the cart)
+- Saved delivery addresses — reuse a previous address at checkout
+- "Add all to cart" from the wishlist; Web Share API button on product pages
+- Quantities capped at available stock; theme defaults to the OS color scheme; floating back-to-top button
 - Toast notifications for cart, wishlist, coupon, and order actions
 - Checkout form with validation and payment method selection; order confirmation with generated ID
 - Cart, wishlist, orders, recently-viewed, coupon, and theme all persisted in localStorage

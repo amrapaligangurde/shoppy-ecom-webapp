@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { formatUSD } from '../api'
 import { useShop } from '../context/ShopContext'
 import { useToast } from '../context/ToastContext'
+import useLocalStorage from '../hooks/useLocalStorage'
 
 const PAYMENT_METHODS = ['Card', 'UPI', 'Cash on Delivery']
 
@@ -12,6 +13,13 @@ export default function Checkout() {
   const toast = useToast()
   const [form, setForm] = useState({ name: '', email: '', address: '', payment: PAYMENT_METHODS[0] })
   const [errors, setErrors] = useState({})
+  const [addresses, setAddresses] = useLocalStorage('shoppy-addresses', [])
+  const [saveAddress, setSaveAddress] = useState(false)
+
+  const fillSaved = (index) => {
+    const saved = addresses[index]
+    if (saved) setForm((f) => ({ ...f, name: saved.name, email: saved.email, address: saved.address }))
+  }
 
   useEffect(() => {
     if (cart.length === 0) navigate('/', { replace: true })
@@ -35,13 +43,25 @@ export default function Checkout() {
     setErrors(errs)
     if (Object.keys(errs).length > 0) return
 
+    if (saveAddress && !addresses.some((a) => a.address === form.address.trim())) {
+      setAddresses([...addresses, { name: form.name.trim(), email: form.email.trim(), address: form.address.trim() }])
+    }
+
     const orderId = `SH${Date.now().toString().slice(-8)}`
     ordersDispatch({
       type: 'add',
       order: {
         id: orderId,
         date: new Date().toISOString(),
-        items: cart.map((i) => ({ id: i.id, title: i.title, qty: i.qty, thumbnail: i.thumbnail })),
+        items: cart.map((i) => ({
+          id: i.id,
+          title: i.title,
+          qty: i.qty,
+          thumbnail: i.thumbnail,
+          price: i.price,
+          discountPercentage: i.discountPercentage,
+          stock: i.stock,
+        })),
         total,
         payment: form.payment,
         name: form.name,
@@ -60,6 +80,21 @@ export default function Checkout() {
     <main className="checkout-page">
       <h1>Checkout</h1>
       <form className="card checkout-form" onSubmit={placeOrder} noValidate>
+        {addresses.length > 0 && (
+          <label className="field">
+            <span>Saved addresses</span>
+            <select defaultValue="" onChange={(e) => fillSaved(Number(e.target.value))}>
+              <option value="" disabled>
+                Choose a saved address…
+              </option>
+              {addresses.map((a, i) => (
+                <option key={i} value={i}>
+                  {a.name} — {a.address.slice(0, 40)}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
         <label className="field">
           <span>Full name</span>
           <input value={form.name} onChange={update('name')} placeholder="Your name" />
@@ -93,6 +128,11 @@ export default function Checkout() {
             </label>
           ))}
         </fieldset>
+
+        <label className="radio">
+          <input type="checkbox" checked={saveAddress} onChange={(e) => setSaveAddress(e.target.checked)} />
+          Save this address for next time
+        </label>
 
         <button type="submit" className="add-btn">
           Place order · {formatUSD(total)}

@@ -1,10 +1,15 @@
 import { Suspense, lazy } from 'react'
 import { Route, Routes } from 'react-router-dom'
 import Navbar from './components/Navbar'
+import BackToTop from './components/BackToTop'
 import ErrorBoundary from './components/ErrorBoundary'
 import ScrollToTop from './components/ScrollToTop'
 import useLocalStorage from './hooks/useLocalStorage'
 import { useEffect } from 'react'
+
+// Respect the OS color scheme on first visit
+const systemTheme = () =>
+  window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
 
 // Route-level code splitting — each page ships as its own chunk
 const Home = lazy(() => import('./pages/Home'))
@@ -17,7 +22,7 @@ const OrdersPage = lazy(() => import('./pages/OrdersPage'))
 const NotFound = lazy(() => import('./pages/NotFound'))
 
 export default function App() {
-  const [theme, setTheme] = useLocalStorage('shoppy-theme', 'light')
+  const [theme, setTheme] = useLocalStorage('shoppy-theme', systemTheme())
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme
@@ -42,6 +47,7 @@ export default function App() {
           </Routes>
         </Suspense>
       </ErrorBoundary>
+      <BackToTop />
       <footer className="footer muted">Shoppy · React + Vite demo store · Product data from DummyJSON</footer>
     </div>
   )

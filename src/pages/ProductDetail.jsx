@@ -67,6 +67,20 @@ export default function ProductDetail() {
     )
   }
 
+  const share = async () => {
+    const url = window.location.href
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: product.title, url })
+      } else {
+        await navigator.clipboard.writeText(url)
+        toast('Link copied to clipboard')
+      }
+    } catch {
+      // user cancelled the share sheet — nothing to do
+    }
+  }
+
   const inCart = cart.find((i) => i.id === product.id)
   const wished = wishlist.some((i) => i.id === product.id)
   const images = product.images?.length ? product.images : [product.thumbnail]
@@ -121,7 +135,12 @@ export default function ProductDetail() {
               <div className="qty-stepper large">
                 <button onClick={() => cartDispatch({ type: 'setQty', id: product.id, qty: inCart.qty - 1 })}>−</button>
                 <span>{inCart.qty} in cart</span>
-                <button onClick={() => cartDispatch({ type: 'setQty', id: product.id, qty: inCart.qty + 1 })}>+</button>
+                <button
+                  disabled={inCart.qty >= product.stock}
+                  onClick={() => cartDispatch({ type: 'setQty', id: product.id, qty: inCart.qty + 1 })}
+                >
+                  +
+                </button>
               </div>
             ) : (
               <button
@@ -143,6 +162,9 @@ export default function ProductDetail() {
               }}
             >
               {wished ? '♥ Wishlisted' : '♡ Wishlist'}
+            </button>
+            <button className="secondary-btn" onClick={share}>
+              ↗ Share
             </button>
           </div>
         </div>
