@@ -1,9 +1,11 @@
 import { Link } from 'react-router-dom'
 import { discountedPrice, formatUSD } from '../api'
 import { useShop } from '../context/ShopContext'
+import { useToast } from '../context/ToastContext'
 
 export default function ProductCard({ product }) {
   const { cart, cartDispatch, wishlist, wishlistDispatch } = useShop()
+  const toast = useToast()
   const inCart = cart.find((i) => i.id === product.id)
   const wished = wishlist.some((i) => i.id === product.id)
   const hasDiscount = (product.discountPercentage ?? 0) >= 1
@@ -16,7 +18,10 @@ export default function ProductCard({ product }) {
       </Link>
       <button
         className={wished ? 'wish-btn active' : 'wish-btn'}
-        onClick={() => wishlistDispatch({ type: 'toggle', item: product })}
+        onClick={() => {
+          wishlistDispatch({ type: 'toggle', item: product })
+          toast(wished ? 'Removed from wishlist' : 'Added to wishlist')
+        }}
         aria-label={wished ? 'Remove from wishlist' : 'Add to wishlist'}
       >
         {wished ? '♥' : '♡'}
@@ -40,7 +45,13 @@ export default function ProductCard({ product }) {
             <button onClick={() => cartDispatch({ type: 'setQty', id: product.id, qty: inCart.qty + 1 })}>+</button>
           </div>
         ) : (
-          <button className="add-btn" onClick={() => cartDispatch({ type: 'add', item: product })}>
+          <button
+            className="add-btn"
+            onClick={() => {
+              cartDispatch({ type: 'add', item: product })
+              toast('Added to cart')
+            }}
+          >
             Add to cart
           </button>
         )}

@@ -1,26 +1,52 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { discountedPrice, fetchProduct, formatUSD } from '../api'
+import { discountedPrice, fetchProduct, fetchProducts, formatUSD } from '../api'
+import ProductStrip from '../components/ProductStrip'
 import { useShop } from '../context/ShopContext'
+import { useToast } from '../context/ToastContext'
 
 export default function ProductDetail() {
   const { id } = useParams()
   const [product, setProduct] = useState(null)
+  const [related, setRelated] = useState([])
   const [activeImage, setActiveImage] = useState(0)
   const [error, setError] = useState(null)
-  const { cart, cartDispatch, wishlist, wishlistDispatch } = useShop()
+  const { cart, cartDispatch, wishlist, wishlistDispatch, recentDispatch } = useShop()
+  const toast = useToast()
 
   useEffect(() => {
     let cancelled = false
     setProduct(null)
+    setRelated([])
     setActiveImage(0)
+    setError(null)
+
     fetchProduct(id)
-      .then((p) => !cancelled && setProduct(p))
+      .then((p) => {
+        if (cancelled) return
+        setProduct(p)
+        // Record a lightweight snapshot for the "Recently viewed" rail
+        recentDispatch({
+          type: 'add',
+          item: {
+            id: p.id,
+            title: p.title,
+            thumbnail: p.thumbnail,
+            price: p.price,
+            discountPercentage: p.discountPercentage,
+          },
+        })
+        // Fetch related products from the same category
+        return fetchProducts({ limit: 8, category: p.category }).then(({ products }) => {
+          if (!cancelled) setRelated(products.filter((r) => r.id !== p.id).slice(0, 6))
+        })
+      })
       .catch(() => !cancelled && setError('Could not load this product.'))
+
     return () => {
       cancelled = true
     }
-  }, [id])
+  }, [id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (error) {
     return (
@@ -45,6 +71,7 @@ export default function ProductDetail() {
   const wished = wishlist.some((i) => i.id === product.id)
   const images = product.images?.length ? product.images : [product.thumbnail]
   const hasDiscount = (product.discountPercentage ?? 0) >= 1
+  const reviews = product.reviews ?? []
 
   return (
     <main className="detail-page">
@@ -100,20 +127,52 @@ export default function ProductDetail() {
               <button
                 className="add-btn large"
                 disabled={product.stock <= 0}
-                onClick={() => cartDispatch({ type: 'add', item: product })}
+                onClick={() => {
+                  cartDispatch({ type: 'add', item: product })
+                  toast('Added to cart')
+                }}
               >
                 Add to cart
               </button>
             )}
             <button
               className={wished ? 'secondary-btn wished' : 'secondary-btn'}
-              onClick={() => wishlistDispatch({ type: 'toggle', item: product })}
+              onClick={() => {
+                wishlistDispatch({ type: 'toggle', item: product })
+                toast(wished ? 'Removed from wishlist' : 'Added to wishlist')
+              }}
             >
               {wished ? '♥ Wishlisted' : '♡ Wishlist'}
             </button>
           </div>
         </div>
       </div>
+
+      {reviews.length > 0 && (
+        <section className="reviews">
+          <h2>Customer reviews</h2>
+          <ul className="review-list">
+            {reviews.map((review, i) => (
+              <li key={i} className="review card">
+                <div className="review-head">
+                  <strong>{review.reviewerName}</strong>
+                  <span className="rating">★ {review.rating}</span>
+                </div>
+                <p>{review.comment}</p>
+                <span className="muted">
+                  {new Date(review.date).toLocaleDateString(undefined, {
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric',
+                  })}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      <ProductStrip title="You may also like" products={related} />
     </main>
   )
 }

@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { fetchCategories, fetchProducts } from '../api'
 import ProductCard from '../components/ProductCard'
+import ProductStrip from '../components/ProductStrip'
+import useDebounce from '../hooks/useDebounce'
+import { useShop } from '../context/ShopContext'
 
 const PAGE_SIZE = 12
 
@@ -17,17 +20,14 @@ export default function Home() {
   const [categories, setCategories] = useState([])
   const [category, setCategory] = useState('')
   const [queryInput, setQueryInput] = useState('')
-  const [query, setQuery] = useState('')
   const [sortKey, setSortKey] = useState('featured')
   const [loading, setLoading] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
   const [error, setError] = useState(null)
+  const { recent } = useShop()
 
-  // Debounce the search box so we don't hit the API on every keystroke
-  useEffect(() => {
-    const t = setTimeout(() => setQuery(queryInput.trim()), 400)
-    return () => clearTimeout(t)
-  }, [queryInput])
+  // Debounced search — avoids an API request per keystroke
+  const query = useDebounce(queryInput.trim(), 400)
 
   useEffect(() => {
     fetchCategories().then(setCategories).catch(() => {})
@@ -78,7 +78,12 @@ export default function Home() {
   return (
     <main>
       <section className="hero">
-        <h1>Everything you need, in one place</h1>
+        <p className="eyebrow">New season · up to 40% off</p>
+        <h1>
+          Good things,
+          <br />
+          close at hand.
+        </h1>
         <p className="muted">Browse {total > 0 ? `${total}+` : 'hundreds of'} products across every category.</p>
         <input
           className="search"
@@ -139,6 +144,8 @@ export default function Home() {
           )}
         </>
       )}
+
+      <ProductStrip title="Recently viewed" products={recent} />
     </main>
   )
 }
