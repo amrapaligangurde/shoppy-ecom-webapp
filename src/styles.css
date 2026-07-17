@@ -48,15 +48,20 @@ h2,
   font-family: 'Fraunces', Georgia, serif;
 }
 
+:root {
+  --gutter: clamp(16px, 4vw, 56px);
+}
+
+/* Full-width layout — content spans the whole viewport with fluid gutters */
 .app {
-  max-width: 1120px;
-  margin: 0 auto;
-  padding: 0 20px 40px;
+  width: 100%;
+  margin: 0;
+  padding: 0 var(--gutter) 40px;
 }
 
 /* ---------- Announcement bar ---------- */
 .announcement {
-  margin: 0 -20px;
+  margin: 0 calc(-1 * var(--gutter));
   background: var(--accent);
   color: var(--accent-contrast);
   text-align: center;
@@ -458,32 +463,98 @@ h2,
   padding: 48px 0;
 }
 
-/* ---------- Skeletons ---------- */
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 0.5;
-  }
-  50% {
-    opacity: 1;
+/* ---------- Skeletons & spinners ---------- */
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
   }
 }
 
-.skeleton-card {
-  height: 320px;
-  border-radius: 10px;
-  background: var(--card);
-  border: 1px solid var(--border);
-  animation: pulse 1.4s ease-in-out infinite;
+.shimmer {
+  background: linear-gradient(90deg, var(--input-bg) 25%, var(--border) 50%, var(--input-bg) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.3s linear infinite;
+  border-radius: 6px;
 }
 
-.skeleton-detail {
-  height: 420px;
+.sk-media {
+  height: 180px;
+  border-radius: 0;
+}
+
+.sk-media.small {
+  height: 100px;
+  border-radius: 6px;
+}
+
+.sk-gallery {
+  height: 380px;
   border-radius: 10px;
-  background: var(--card);
-  border: 1px solid var(--border);
-  animation: pulse 1.4s ease-in-out infinite;
-  margin-top: 24px;
+}
+
+.sk-line {
+  height: 12px;
+  margin: 6px 0;
+}
+
+.sk-title {
+  height: 26px;
+  margin: 10px 0;
+}
+
+.sk-btn {
+  height: 38px;
+  margin-top: 10px;
+}
+
+.w40 {
+  width: 40%;
+}
+
+.w60 {
+  width: 60%;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spinner {
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+.spinner.sm {
+  width: 14px;
+  height: 14px;
+  border-width: 2px;
+}
+
+.btn-loading {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.page-loader {
+  display: flex;
+  justify-content: center;
+  padding: 90px 0;
+}
+
+.search-spinner {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 /* ---------- Product detail ---------- */
