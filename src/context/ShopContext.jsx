@@ -15,18 +15,37 @@ const RECENT_KEY = 'shoppy-recent'
 const COUPON_KEY = 'shoppy-coupon'
 const RECENT_LIMIT = 8
 
+// Quantities are capped at available stock (99 if unknown)
+const maxQty = (item) => item.stock ?? 99
+
 function cartReducer(state, action) {
   switch (action.type) {
     case 'add': {
       const existing = state.find((i) => i.id === action.item.id)
       if (existing) {
-        return state.map((i) => (i.id === action.item.id ? { ...i, qty: i.qty + 1 } : i))
+        return state.map((i) =>
+          i.id === action.item.id ? { ...i, qty: Math.min(i.qty + 1, maxQty(i)) } : i,
+        )
       }
       return [...state, { ...action.item, qty: 1 }]
     }
+    case 'addMany': {
+      let next = [...state]
+      for (const item of action.items) {
+        const existing = next.find((i) => i.id === item.id)
+        if (existing) {
+          next = next.map((i) =>
+            i.id === item.id ? { ...i, qty: Math.min(i.qty + (item.qty ?? 1), maxQty(i)) } : i,
+          )
+        } else {
+          next.push({ ...item, qty: Math.min(item.qty ?? 1, maxQty(item)) })
+        }
+      }
+      return next
+    }
     case 'setQty': {
       if (action.qty <= 0) return state.filter((i) => i.id !== action.id)
-      return state.map((i) => (i.id === action.id ? { ...i, qty: action.qty } : i))
+      return state.map((i) => (i.id === action.id ? { ...i, qty: Math.min(action.qty, maxQty(i)) } : i))
     }
     case 'remove':
       return state.filter((i) => i.id !== action.id)

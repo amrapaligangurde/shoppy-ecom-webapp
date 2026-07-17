@@ -1,9 +1,18 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { formatUSD } from '../api'
 import { useShop } from '../context/ShopContext'
+import { useToast } from '../context/ToastContext'
 
 export default function OrdersPage() {
-  const { orders } = useShop()
+  const { orders, cartDispatch } = useShop()
+  const toast = useToast()
+  const navigate = useNavigate()
+
+  const reorder = (order) => {
+    cartDispatch({ type: 'addMany', items: order.items })
+    toast('Order items added to cart')
+    navigate('/cart')
+  }
 
   return (
     <main className="cart-page">
@@ -40,7 +49,16 @@ export default function OrdersPage() {
                   </Link>
                 ))}
               </div>
-              <span className="muted">{order.payment} · {order.items.length} product(s)</span>
+              <div className="order-foot">
+                <span className="muted">
+                  {order.payment} · {order.items.length} product(s)
+                </span>
+                {order.items.every((i) => i.price != null) && (
+                  <button className="secondary-btn" onClick={() => reorder(order)}>
+                    Reorder
+                  </button>
+                )}
+              </div>
             </li>
           ))}
         </ul>

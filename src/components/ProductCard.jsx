@@ -42,7 +42,12 @@ export default function ProductCard({ product }) {
           <div className="qty-stepper">
             <button onClick={() => cartDispatch({ type: 'setQty', id: product.id, qty: inCart.qty - 1 })}>−</button>
             <span>{inCart.qty}</span>
-            <button onClick={() => cartDispatch({ type: 'setQty', id: product.id, qty: inCart.qty + 1 })}>+</button>
+            <button
+              disabled={product.stock != null && inCart.qty >= product.stock}
+              onClick={() => cartDispatch({ type: 'setQty', id: product.id, qty: inCart.qty + 1 })}
+            >
+              +
+            </button>
           </div>
         ) : (
           <button
