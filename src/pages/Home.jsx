@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { discountedPrice, fetchCategories, fetchProducts, formatUSD } from '../api'
 import ProductCard from '../components/ProductCard'
 import ProductStrip from '../components/ProductStrip'
+import { SkeletonGrid } from '../components/Skeletons'
 import useDebounce from '../hooks/useDebounce'
 import { useShop } from '../context/ShopContext'
 
@@ -128,6 +129,7 @@ export default function Home() {
             onFocus={() => setShowSuggest(true)}
             onBlur={() => setTimeout(() => setShowSuggest(false), 150)}
           />
+          {queryInput.trim() !== query && <span className="search-spinner spinner sm" aria-hidden="true" />}
           {showSuggest && suggestions.length > 0 && (
             <ul className="suggest">
               {suggestions.map((s) => (
@@ -203,11 +205,7 @@ export default function Home() {
       {error && <p className="error">{error}</p>}
 
       {loading ? (
-        <section className="product-grid">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="skeleton-card" />
-          ))}
-        </section>
+        <SkeletonGrid />
       ) : visible.length === 0 ? (
         <p className="muted empty">No products match your filters. Try loosening them.</p>
       ) : (
@@ -219,7 +217,8 @@ export default function Home() {
           </section>
           {products.length < total && (
             <div className="load-more-wrap">
-              <button className="secondary-btn" onClick={loadMore} disabled={loadingMore}>
+              <button className="secondary-btn btn-loading" onClick={loadMore} disabled={loadingMore}>
+                {loadingMore && <span className="spinner sm" aria-hidden="true" />}
                 {loadingMore ? 'Loading…' : `Load more (${products.length} of ${total})`}
               </button>
             </div>

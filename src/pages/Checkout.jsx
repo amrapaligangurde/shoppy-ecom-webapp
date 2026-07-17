@@ -15,6 +15,7 @@ export default function Checkout() {
   const [errors, setErrors] = useState({})
   const [addresses, setAddresses] = useLocalStorage('shoppy-addresses', [])
   const [saveAddress, setSaveAddress] = useState(false)
+  const [placing, setPlacing] = useState(false)
 
   const fillSaved = (index) => {
     const saved = addresses[index]
@@ -37,11 +38,15 @@ export default function Checkout() {
     return errs
   }
 
-  const placeOrder = (e) => {
+  const placeOrder = async (e) => {
     e.preventDefault()
     const errs = validate()
     setErrors(errs)
-    if (Object.keys(errs).length > 0) return
+    if (Object.keys(errs).length > 0 || placing) return
+
+    // Simulate payment processing so the UI shows a real submitting state
+    setPlacing(true)
+    await new Promise((resolve) => setTimeout(resolve, 900))
 
     if (saveAddress && !addresses.some((a) => a.address === form.address.trim())) {
       setAddresses([...addresses, { name: form.name.trim(), email: form.email.trim(), address: form.address.trim() }])
@@ -134,8 +139,9 @@ export default function Checkout() {
           Save this address for next time
         </label>
 
-        <button type="submit" className="add-btn">
-          Place order · {formatUSD(total)}
+        <button type="submit" className="add-btn btn-loading" disabled={placing}>
+          {placing && <span className="spinner sm" aria-hidden="true" />}
+          {placing ? 'Placing order…' : `Place order · ${formatUSD(total)}`}
         </button>
       </form>
     </main>

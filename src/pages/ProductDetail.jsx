@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { discountedPrice, fetchProduct, fetchProducts, formatUSD } from '../api'
 import ProductStrip from '../components/ProductStrip'
+import { SkeletonDetail } from '../components/Skeletons'
 import { useShop } from '../context/ShopContext'
 import { useToast } from '../context/ToastContext'
 
@@ -9,6 +10,7 @@ export default function ProductDetail() {
   const { id } = useParams()
   const [product, setProduct] = useState(null)
   const [related, setRelated] = useState([])
+  const [relatedLoading, setRelatedLoading] = useState(false)
   const [activeImage, setActiveImage] = useState(0)
   const [error, setError] = useState(null)
   const { cart, cartDispatch, wishlist, wishlistDispatch, recentDispatch } = useShop()
@@ -37,11 +39,19 @@ export default function ProductDetail() {
           },
         })
         // Fetch related products from the same category
-        return fetchProducts({ limit: 8, category: p.category }).then(({ products }) => {
-          if (!cancelled) setRelated(products.filter((r) => r.id !== p.id).slice(0, 6))
-        })
+        setRelatedLoading(true)
+        return fetchProducts({ limit: 8, category: p.category })
+          .then(({ products }) => {
+            if (!cancelled) setRelated(products.filter((r) => r.id !== p.id).slice(0, 6))
+          })
+          .finally(() => !cancelled && setRelatedLoading(false))
       })
-      .catch(() => !cancelled && setError('Could not load this product.'))
+      .catch(() => {
+        if (!cancelled) {
+          setError('Could not load this product.')
+          setRelatedLoading(false)
+        }
+      })
 
     return () => {
       cancelled = true
@@ -62,7 +72,7 @@ export default function ProductDetail() {
   if (!product) {
     return (
       <main className="detail-page">
-        <div className="skeleton-detail" />
+        <SkeletonDetail />
       </main>
     )
   }
@@ -194,7 +204,7 @@ export default function ProductDetail() {
         </section>
       )}
 
-      <ProductStrip title="You may also like" products={related} />
+      <ProductStrip title="You may also like" products={related} loading={relatedLoading} />
     </main>
   )
 }

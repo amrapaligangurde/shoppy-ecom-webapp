@@ -4,6 +4,7 @@ import Navbar from './components/Navbar'
 import BackToTop from './components/BackToTop'
 import ErrorBoundary from './components/ErrorBoundary'
 import ScrollToTop from './components/ScrollToTop'
+import { PageLoader } from './components/Skeletons'
 import useLocalStorage from './hooks/useLocalStorage'
 import { useEffect } from 'react'
 
@@ -34,7 +35,7 @@ export default function App() {
       <Navbar theme={theme} onToggleTheme={() => setTheme(theme === 'dark' ? 'light' : 'dark')} />
       <ErrorBoundary>
         <ScrollToTop />
-        <Suspense fallback={<div className="skeleton-detail" />}>
+        <Suspense fallback={<PageLoader />}>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/product/:id" element={<ProductDetail />} />
