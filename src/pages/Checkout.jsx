@@ -2,12 +2,14 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { formatUSD } from '../api'
 import { useShop } from '../context/ShopContext'
+import { useToast } from '../context/ToastContext'
 
 const PAYMENT_METHODS = ['Card', 'UPI', 'Cash on Delivery']
 
 export default function Checkout() {
-  const { cart, total, cartDispatch } = useShop()
+  const { cart, total, cartDispatch, ordersDispatch, removeCoupon } = useShop()
   const navigate = useNavigate()
+  const toast = useToast()
   const [form, setForm] = useState({ name: '', email: '', address: '', payment: PAYMENT_METHODS[0] })
   const [errors, setErrors] = useState({})
 
@@ -34,9 +36,24 @@ export default function Checkout() {
     if (Object.keys(errs).length > 0) return
 
     const orderId = `SH${Date.now().toString().slice(-8)}`
-    const order = { orderId, total, name: form.name, payment: form.payment, itemCount: cart.length }
+    ordersDispatch({
+      type: 'add',
+      order: {
+        id: orderId,
+        date: new Date().toISOString(),
+        items: cart.map((i) => ({ id: i.id, title: i.title, qty: i.qty, thumbnail: i.thumbnail })),
+        total,
+        payment: form.payment,
+        name: form.name,
+      },
+    })
     cartDispatch({ type: 'clear' })
-    navigate('/order-success', { state: order, replace: true })
+    removeCoupon()
+    toast('Order placed!')
+    navigate('/order-success', {
+      state: { orderId, total, name: form.name, payment: form.payment, itemCount: cart.length },
+      replace: true,
+    })
   }
 
   return (

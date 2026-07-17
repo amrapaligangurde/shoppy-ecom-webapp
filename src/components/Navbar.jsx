@@ -7,11 +7,14 @@ export default function Navbar({ theme, onToggleTheme }) {
   return (
     <nav className="navbar">
       <Link to="/" className="brand">
-        🛍️ Shoppy
+        Shoppy<span className="brand-dot">.</span>
       </Link>
       <div className="nav-actions">
         <NavLink to="/" className="nav-link" end>
           Shop
+        </NavLink>
+        <NavLink to="/orders" className="nav-link">
+          Orders
         </NavLink>
         <NavLink to="/wishlist" className="nav-link badge-link">
           ♡ Wishlist

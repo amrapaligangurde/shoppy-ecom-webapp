@@ -1,10 +1,34 @@
+import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { discountedPrice, formatUSD } from '../api'
 import { useShop } from '../context/ShopContext'
+import { useToast } from '../context/ToastContext'
 
 export default function CartPage() {
-  const { cart, cartDispatch, subtotal, savings, shipping, total } = useShop()
+  const {
+    cart,
+    cartDispatch,
+    subtotal,
+    savings,
+    shipping,
+    total,
+    coupon,
+    couponDiscount,
+    applyCoupon,
+    removeCoupon,
+  } = useShop()
   const navigate = useNavigate()
+  const toast = useToast()
+  const [code, setCode] = useState('')
+
+  const handleApply = () => {
+    if (applyCoupon(code)) {
+      toast(`Coupon ${code.trim().toUpperCase()} applied`)
+      setCode('')
+    } else {
+      toast('Invalid coupon code', 'error')
+    }
+  }
 
   if (cart.length === 0) {
     return (
@@ -59,6 +83,29 @@ export default function CartPage() {
             <div className="bill-row savings">
               <span>You save</span>
               <span>−{formatUSD(savings)}</span>
+            </div>
+          )}
+          {coupon ? (
+            <div className="bill-row savings">
+              <span>
+                Coupon {coupon}{' '}
+                <button className="link-btn" onClick={removeCoupon}>
+                  remove
+                </button>
+              </span>
+              <span>−{formatUSD(couponDiscount)}</span>
+            </div>
+          ) : (
+            <div className="promo-row">
+              <input
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+                placeholder="Coupon code (try SHOPPY10)"
+                onKeyDown={(e) => e.key === 'Enter' && handleApply()}
+              />
+              <button className="secondary-btn" onClick={handleApply}>
+                Apply
+              </button>
             </div>
           )}
           <div className="bill-row">
